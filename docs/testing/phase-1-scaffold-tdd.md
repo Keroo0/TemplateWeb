@@ -27,6 +27,7 @@ Dokumen ini mencatat skenario TDD untuk fondasi Next.js Mauapalau. Test otomatis
 
 ```bash
 npm run test:scaffold
+npm run test:ui
 npm install
 npm run lint
 npm run typecheck
