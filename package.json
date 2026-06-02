@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "test:scaffold": "node --test tests/scaffold.test.mjs",
     "test:ui": "node --test tests/ui-foundation.test.mjs",
-    "test:sql": "node --test tests/sql-package.test.mjs"
+    "test:sql": "node --test tests/sql-package.test.mjs",
+    "test:supabase": "node --test tests/supabase-integration.test.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",

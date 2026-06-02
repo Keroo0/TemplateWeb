@@ -1,4 +1,8 @@
-export default function AdminPage() {
+import { requireAdminUser } from "@/lib/admin-auth";
+
+export default async function AdminPage() {
+  await requireAdminUser();
+
   return (
     <main className="mx-auto flex min-h-screen max-w-5xl items-center px-6">
       <div>
