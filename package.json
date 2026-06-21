@@ -12,7 +12,8 @@
     "test:sql": "node --test tests/sql-package.test.mjs",
     "test:supabase": "node --test tests/supabase-integration.test.mjs",
     "test:catalog": "node --test tests/catalog.test.mjs",
-    "test:orders": "node --test tests/order-form.test.mjs"
+    "test:orders": "node --test tests/order-form.test.mjs",
+    "test:payments": "node --test tests/payments.test.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",

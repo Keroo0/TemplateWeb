@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { parseTemplateFields, type TemplateField } from "@/lib/form-schema";
@@ -21,6 +22,7 @@ export function OrderForm({ template }: { template: CatalogTemplate }) {
     [template.form_schema]
   );
   const [message, setMessage] = useState<string | null>(null);
+  const [paymentHref, setPaymentHref] = useState<string | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<Record<string, File | null>>({});
   const {
     register,
@@ -38,11 +40,12 @@ export function OrderForm({ template }: { template: CatalogTemplate }) {
 
   async function onSubmit(values: OrderFormValues) {
     setMessage(null);
+    setPaymentHref(null);
 
     const payload = {
-        template_slug: template.slug,
-        ...values
-      };
+      template_slug: template.slug,
+      ...values
+    };
     const requestBody = new FormData();
     requestBody.append("payload", JSON.stringify(payload));
 
@@ -67,7 +70,14 @@ export function OrderForm({ template }: { template: CatalogTemplate }) {
       return;
     }
 
-    setMessage(`Pesanan dibuat: ${result.order?.order_code}. Lanjut pembayaran di Phase 7.`);
+    if (!result.order?.order_code) {
+      setMessage("Pesanan dibuat, tapi kode pesanan belum tersedia.");
+      return;
+    }
+
+    const nextPaymentHref = `/payment/${result.order?.order_code}`;
+    setPaymentHref(nextPaymentHref);
+    setMessage(`Pesanan dibuat: ${result.order?.order_code}.`);
   }
 
   return (
@@ -104,9 +114,17 @@ export function OrderForm({ template }: { template: CatalogTemplate }) {
       </div>
 
       {message ? (
-        <p className="border border-border bg-muted p-3 text-sm text-muted-foreground">
-          {message}
-        </p>
+        <div className="border border-border bg-muted p-3 text-sm text-muted-foreground">
+          <p>{message}</p>
+          {paymentHref ? (
+            <Link
+              href={paymentHref}
+              className="mt-3 inline-flex font-semibold text-foreground hover:text-primary"
+            >
+              Lanjut pembayaran
+            </Link>
+          ) : null}
+        </div>
       ) : null}
 
       <Button type="submit" disabled={isSubmitting}>
