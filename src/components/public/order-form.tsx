@@ -22,7 +22,7 @@ export function OrderForm({ template }: { template: CatalogTemplate }) {
     [template.form_schema]
   );
   const [message, setMessage] = useState<string | null>(null);
-  const [paymentHref, setPaymentHref] = useState<string | null>(null);
+  const [confirmationHref, setConfirmationHref] = useState<string | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<Record<string, File | null>>({});
   const {
     register,
@@ -40,7 +40,7 @@ export function OrderForm({ template }: { template: CatalogTemplate }) {
 
   async function onSubmit(values: OrderFormValues) {
     setMessage(null);
-    setPaymentHref(null);
+    setConfirmationHref(null);
 
     const payload = {
       template_slug: template.slug,
@@ -75,8 +75,8 @@ export function OrderForm({ template }: { template: CatalogTemplate }) {
       return;
     }
 
-    const nextPaymentHref = `/payment/${result.order?.order_code}`;
-    setPaymentHref(nextPaymentHref);
+    const nextConfirmationHref = `/payment/${result.order?.order_code}`;
+    setConfirmationHref(nextConfirmationHref);
     setMessage(`Pesanan dibuat: ${result.order?.order_code}.`);
   }
 
@@ -116,12 +116,12 @@ export function OrderForm({ template }: { template: CatalogTemplate }) {
       {message ? (
         <div className="border border-border bg-muted p-3 text-sm text-muted-foreground">
           <p>{message}</p>
-          {paymentHref ? (
+          {confirmationHref ? (
             <Link
-              href={paymentHref}
+              href={confirmationHref}
               className="mt-3 inline-flex font-semibold text-foreground hover:text-primary"
             >
-              Lanjut pembayaran
+              Lanjut via WhatsApp
             </Link>
           ) : null}
         </div>

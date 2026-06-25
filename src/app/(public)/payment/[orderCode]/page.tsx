@@ -1,4 +1,4 @@
-import { ArrowLeft, CreditCard, ShieldCheck } from "lucide-react";
+import { ArrowLeft, MessageCircle, ReceiptText, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
 import { PaymentPanel } from "@/components/public/payment-panel";
@@ -29,22 +29,23 @@ export default async function PaymentPage({ params }: PaymentPageProps) {
 
         <section className="mt-10 grid gap-8 lg:grid-cols-[1fr_0.75fr] lg:items-start">
           <div>
-            <Badge variant="outline">Midtrans Snap</Badge>
+            <Badge variant="outline">WhatsApp handoff</Badge>
             <h1 className="mt-5 text-4xl font-semibold tracking-normal sm:text-5xl">
-              Selesaikan pembayaran pesanan.
+              Lanjutkan konfirmasi pesanan via WhatsApp.
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
-              Gunakan kode pesanan {orderCode} untuk membuka checkout Midtrans.
-              Setelah pembayaran berhasil, status pesanan akan diperbarui dari
-              notifikasi pembayaran.
+              Pesanan {orderCode} sudah masuk. Kirim kode ini ke WhatsApp supaya
+              admin bisa cek data, memberi instruksi pembayaran, dan mulai
+              mengatur antrean pengerjaan.
             </p>
 
             <div className="mt-8 grid gap-3 text-sm sm:grid-cols-2">
               <Card>
                 <CardContent className="flex items-start gap-3 p-5">
-                  <CreditCard className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                  <MessageCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                   <p className="leading-6 text-muted-foreground">
-                    Checkout dibuat dari endpoint /api/payments/snap.
+                    Link WhatsApp otomatis membawa kode pesanan, jadi chat tidak
+                    perlu dimulai dari nol.
                   </p>
                 </CardContent>
               </Card>
@@ -52,18 +53,24 @@ export default async function PaymentPage({ params }: PaymentPageProps) {
                 <CardContent className="flex items-start gap-3 p-5">
                   <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                   <p className="leading-6 text-muted-foreground">
-                    Bayar sekarang lewat halaman aman Midtrans.
+                    Pembayaran dikonfirmasi manual oleh admin sebelum status
+                    pesanan dipindah ke pengerjaan.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="sm:col-span-2">
+                <CardContent className="flex items-start gap-3 p-5">
+                  <ReceiptText className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                  <p className="leading-6 text-muted-foreground">
+                    Simpan kode {orderCode} untuk follow-up dan pengecekan status
+                    pesanan berikutnya.
                   </p>
                 </CardContent>
               </Card>
             </div>
           </div>
 
-          <PaymentPanel
-            orderCode={orderCode}
-            snapEndpoint="/api/payments/snap"
-            ctaLabel="Bayar sekarang"
-          />
+          <PaymentPanel orderCode={orderCode} ctaLabel="Konfirmasi via WhatsApp" />
         </section>
       </div>
     </main>

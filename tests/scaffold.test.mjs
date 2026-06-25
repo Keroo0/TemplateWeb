@@ -59,7 +59,6 @@ describe("Phase 1 scaffold contract", () => {
       "@supabase/supabase-js",
       "framer-motion",
       "lucide-react",
-      "midtrans-client",
       "react-hook-form",
       "resend",
       "zod"
@@ -76,8 +75,7 @@ describe("Phase 1 scaffold contract", () => {
       "NEXT_PUBLIC_SUPABASE_URL",
       "NEXT_PUBLIC_SUPABASE_ANON_KEY",
       "SUPABASE_SERVICE_ROLE_KEY",
-      "MIDTRANS_SERVER_KEY",
-      "MIDTRANS_CLIENT_KEY",
+      "NEXT_PUBLIC_WHATSAPP_ORDER_NUMBER",
       "RESEND_API_KEY",
       "ADMIN_EMAILS"
     ]) {

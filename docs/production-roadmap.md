@@ -4,18 +4,18 @@ Dokumen ini adalah urutan kerja dari repo kosong sampai production. Database aka
 
 ## Phase 0 - Fondasi Produk
 
-- Kunci scope MVP: landing page, katalog template, order form, pembayaran Midtrans, cek status pesanan, admin dashboard, dan delivery link/zip.
+- Kunci scope MVP: landing page, katalog template, order form, konfirmasi pembayaran via WhatsApp, cek status pesanan, admin dashboard, dan delivery link/zip.
 - Tetapkan kategori awal: undangan, maaf, nembak, landing-page, dan CRUD.
 - Tetapkan status order: `pending_payment`, `paid`, `in_progress`, `ready`, `delivered`, `cancelled`, `expired`.
-- Siapkan copy Bahasa Indonesia untuk flow customer: landing, katalog, form order, payment, status, dan email.
-- Buat `.env.example` yang memuat Supabase, Midtrans, Resend, admin emails, dan app URL.
+- Siapkan copy Bahasa Indonesia untuk flow customer: landing, katalog, form order, konfirmasi WhatsApp, status, dan email.
+- Buat `.env.example` yang memuat Supabase, WhatsApp order number, Resend, admin emails, dan app URL.
 
 ## Phase 0.5 - Workflow Engineering
 
 - Setiap fitur baru dimulai dengan TDD scenario list sebelum implementasi.
 - Minimal setiap fitur punya skenario terbaik dan skenario terburuk:
   - skenario terbaik: user/admin menjalankan flow normal sampai sukses,
-  - skenario terburuk: input invalid, akses tidak sah, webhook duplikat, upload terlalu besar, pembayaran gagal, atau dependency eksternal error sesuai konteks fitur.
+  - skenario terburuk: input invalid, akses tidak sah, upload terlalu besar, konfirmasi pembayaran tertunda, atau dependency eksternal error sesuai konteks fitur.
 - Pilih level test sesuai risiko: unit test untuk pure logic, integration test untuk API/database boundary, dan Playwright/manual QA untuk flow UI utama.
 - Setelah fitur selesai, jalankan verification yang relevan: `npm run lint`, `npm run typecheck`, `npm run build`, dan test spesifik fitur.
 - Commit perubahan fitur dengan pesan jelas dan push ke GitHub remote `origin`.
@@ -24,7 +24,7 @@ Dokumen ini adalah urutan kerja dari repo kosong sampai production. Database aka
 ## Phase 1 - Scaffold Next.js
 
 - Buat app Next.js 15 dengan App Router, TypeScript strict mode, dan struktur `src/`.
-- Install Tailwind CSS, shadcn/ui, lucide-react, react-hook-form, zod, Framer Motion, Supabase client/server SDK, Midtrans helper, dan Resend.
+- Install Tailwind CSS, shadcn/ui, lucide-react, react-hook-form, zod, Framer Motion, Supabase client/server SDK, helper WhatsApp, dan Resend.
 - Setup alias import, format linting, dan script dasar: `dev`, `build`, `lint`, `typecheck`.
 - Buat layout dasar publik dan admin.
 - Pastikan project bisa jalan lokal dengan `npm run dev`.
@@ -81,14 +81,13 @@ Dokumen ini adalah urutan kerja dari repo kosong sampai production. Database aka
 - Support upload file dengan limit 5MB per file dan 20MB total per order.
 - Snapshot `form_data` ke `orders.form_data` saat order dibuat.
 
-## Phase 7 - Midtrans Payment
+## Phase 7 - WhatsApp Payment Handoff
 
-- Buat API route untuk membuat order dan Snap token.
-- Integrasikan Midtrans Snap di client.
-- Simpan `midtrans_order_id`, gross amount, transaction status, dan payment metadata.
-- Buat webhook route yang idempotent.
-- Webhook wajib verify signature dan re-check status ke Midtrans API sebelum update order.
-- Buat halaman payment success/pending/error yang ramah dalam Bahasa Indonesia.
+- Buat helper `src/lib/whatsapp.ts` untuk normalisasi nomor dan link `wa.me`.
+- Arahkan order sukses ke `/payment/[orderCode]` sebagai halaman konfirmasi WhatsApp.
+- Kirim kode pesanan dan konteks paket/template dalam pesan WhatsApp otomatis.
+- Biarkan order berada di `pending_payment` sampai admin mengonfirmasi pembayaran manual.
+- Buat copy halaman konfirmasi yang jelas dalam Bahasa Indonesia.
 
 ## Phase 8 - Admin Dashboard
 
@@ -116,9 +115,9 @@ Dokumen ini adalah urutan kerja dari repo kosong sampai production. Database aka
 ## Phase 11 - Testing dan QA
 
 - Jalankan `npm run lint`, `npm run typecheck`, dan `npm run build`.
-- Test manual flow customer: katalog -> order -> upload -> payment sandbox -> cek status.
+- Test manual flow customer: katalog -> order -> upload -> WhatsApp confirmation -> cek status.
 - Test manual flow admin: login -> lihat order -> update status -> delivery.
-- Test webhook Midtrans sandbox dengan payload valid dan duplicate event.
+- Test bahwa link WhatsApp membawa kode pesanan yang benar dan tidak mengubah status otomatis.
 - Test RLS: anon tidak bisa membaca data private.
 - Test mobile viewport untuk landing, katalog, order form, payment, dan cek status.
 
@@ -127,15 +126,15 @@ Dokumen ini adalah urutan kerja dari repo kosong sampai production. Database aka
 - Buat project Vercel.
 - Set environment variables production.
 - Owner menjalankan SQL manual di Supabase production sesuai `supabase/sql/README.md`.
-- Set Midtrans production keys dan webhook URL.
+- Set `NEXT_PUBLIC_WHATSAPP_ORDER_NUMBER` production.
 - Set domain production.
 - Jalankan final build dan smoke test.
-- Aktifkan monitoring dasar: Vercel logs, Supabase logs, dan Midtrans dashboard.
+- Aktifkan monitoring dasar: Vercel logs, Supabase logs, dan proses follow-up WhatsApp manual.
 
 ## Definition of Done
 
-- Customer bisa memilih template, mengisi data, membayar, dan mengecek status.
+- Customer bisa memilih template, mengisi data, konfirmasi pembayaran via WhatsApp, dan mengecek status.
 - Admin bisa melihat order, memproses order, dan mengirim delivery.
-- Payment webhook aman, verified, dan idempotent.
+- Status pembayaran hanya berubah lewat workflow admin/manual yang tervalidasi.
 - Database setup bisa diulang dari folder SQL dan README tanpa menebak langkah.
 - UI berbahasa Indonesia, mobile-friendly, dan animasi Framer Motion tidak mengganggu flow utama.

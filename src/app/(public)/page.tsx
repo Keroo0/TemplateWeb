@@ -2,10 +2,9 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock3,
-  CreditCard,
   FileArchive,
+  MessageCircle,
   MonitorSmartphone,
-  ShieldCheck,
   Sparkles
 } from "lucide-react";
 import Link from "next/link";
@@ -22,6 +21,7 @@ import {
   CardTitle
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { buildWhatsAppUrl } from "@/lib/whatsapp";
 
 const templates = [
   {
@@ -56,9 +56,9 @@ const steps = [
     icon: Sparkles
   },
   {
-    title: "Bayar aman",
-    description: "Checkout lewat Midtrans Snap, lalu pesanan masuk antrean admin.",
-    icon: CreditCard
+    title: "Konfirmasi via WA",
+    description: "Kode pesanan dikirim ke WhatsApp untuk instruksi pembayaran manual.",
+    icon: MessageCircle
   },
   {
     title: "Terima hasil",
@@ -72,6 +72,51 @@ const reasons = [
   "Dikerjakan manual, bukan generator mentah",
   "Bisa cek status tanpa login",
   "Delivery fleksibel: link hosted atau zip"
+];
+
+const pricingPlans = [
+  {
+    title: "Personal",
+    price: "79rb",
+    unit: "mulai dari",
+    description: "Untuk web personal singkat yang fokus ke satu momen.",
+    estimate: "1-2 hari",
+    features: [
+      "Web permintaan maaf atau nembak",
+      "Copywriting ringan dibantu rapikan",
+      "Satu halaman hosted",
+      "Konfirmasi dan revisi via WhatsApp"
+    ],
+    highlighted: false
+  },
+  {
+    title: "Undangan",
+    price: "149rb",
+    unit: "mulai dari",
+    description: "Paket paling pas untuk undangan online yang siap dibagikan.",
+    estimate: "2-4 hari",
+    features: [
+      "Detail acara, galeri, lokasi, dan rekening",
+      "Form data lengkap sebelum chat",
+      "Link hosted siap sebar",
+      "Update status pesanan tanpa login"
+    ],
+    highlighted: true
+  },
+  {
+    title: "Bisnis",
+    price: "299rb",
+    unit: "mulai dari",
+    description: "Landing page untuk produk, jasa, campaign, atau validasi ide.",
+    estimate: "3-5 hari",
+    features: [
+      "Struktur landing page satu halaman",
+      "CTA WhatsApp atau form prospek",
+      "Section manfaat, produk, dan social proof",
+      "Delivery hosted atau zip download"
+    ],
+    highlighted: false
+  }
 ];
 
 export default function HomePage() {
@@ -101,7 +146,7 @@ export default function HomePage() {
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-            Pilih template, isi data, bayar aman lewat Midtrans, lalu hasilnya
+            Pilih template, isi data, konfirmasi lewat WhatsApp, lalu hasilnya
             dikirim sebagai link hosted atau file zip yang siap dibagikan.
           </p>
 
@@ -165,7 +210,7 @@ export default function HomePage() {
         <SectionHeader
           eyebrow="Cara kerja"
           title="Flow order dibuat pendek supaya customer nggak hilang di tengah jalan."
-          description="Phase berikutnya akan menyambungkan katalog, form dinamis, pembayaran, dan dashboard admin ke database Supabase."
+          description="Katalog, form dinamis, konfirmasi WhatsApp, dan dashboard admin dibuat saling nyambung supaya data pesanan tetap rapi."
         />
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -198,13 +243,130 @@ export default function HomePage() {
               </p>
             </div>
             <div className="border border-background/15 p-5">
-              <ShieldCheck className="h-5 w-5 text-secondary" />
-              <p className="mt-4 text-sm font-semibold">Pembayaran aman</p>
+              <MessageCircle className="h-5 w-5 text-secondary" />
+              <p className="mt-4 text-sm font-semibold">Konfirmasi cepat</p>
               <p className="mt-2 text-sm leading-6 text-background/70">
-                Midtrans Snap dipakai untuk checkout, webhook diverifikasi di server.
+                Instruksi pembayaran dikirim manual via WhatsApp setelah data order masuk.
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-6 py-20">
+        <div className="mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <SectionHeader
+            eyebrow="Price list"
+            title="Pilih paket seperti milih subscription, tapi ngobrolnya tetap manusia."
+            description="Semua paket bisa langsung dibahas via WhatsApp. Kalau sudah yakin dengan template tertentu, lanjutkan lewat katalog supaya data order tersimpan rapi."
+          />
+          <Badge variant="outline" className="w-fit">
+            Payment manual via WhatsApp
+          </Badge>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-3">
+          {pricingPlans.map((plan) => {
+            const whatsappUrl = buildWhatsAppUrl({
+              templateName: plan.title,
+              source: "Price list beranda"
+            });
+
+            return (
+              <Card
+                key={plan.title}
+                className={cn(
+                  "flex min-h-[520px] flex-col p-1",
+                  plan.highlighted
+                    ? "border-foreground bg-foreground text-background"
+                    : "bg-card"
+                )}
+              >
+                <CardHeader className="min-h-44">
+                  <div className="flex items-start justify-between gap-3">
+                    <Badge
+                      variant={plan.highlighted ? "secondary" : "outline"}
+                      className="w-fit"
+                    >
+                      {plan.highlighted ? "Paling sering dipilih" : plan.estimate}
+                    </Badge>
+                    {plan.highlighted ? (
+                      <Sparkles className="h-5 w-5 text-secondary" />
+                    ) : null}
+                  </div>
+                  <CardTitle className="pt-4 text-2xl">{plan.title}</CardTitle>
+                  <CardDescription
+                    className={cn(plan.highlighted && "text-background/70")}
+                  >
+                    {plan.description}
+                  </CardDescription>
+                </CardHeader>
+
+                <CardContent className="flex flex-1 flex-col">
+                  <div className="mb-6">
+                    <p
+                      className={cn(
+                        "text-sm",
+                        plan.highlighted ? "text-background/60" : "text-muted-foreground"
+                      )}
+                    >
+                      {plan.unit}
+                    </p>
+                    <p className="mt-1 text-4xl font-semibold tracking-normal">
+                      {plan.price}
+                    </p>
+                    <p
+                      className={cn(
+                        "mt-2 text-sm",
+                        plan.highlighted ? "text-background/60" : "text-muted-foreground"
+                      )}
+                    >
+                      Estimasi pengerjaan {plan.estimate}
+                    </p>
+                  </div>
+
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={cn(
+                      buttonVariants({
+                        variant: plan.highlighted ? "secondary" : "default",
+                        size: "lg"
+                      }),
+                      "w-full"
+                    )}
+                  >
+                    Chat paket ini
+                    <MessageCircle />
+                  </a>
+
+                  <div className="mt-7 space-y-3">
+                    {plan.features.map((feature) => (
+                      <div key={feature} className="flex items-start gap-3">
+                        <CheckCircle2
+                          className={cn(
+                            "mt-0.5 h-4 w-4 shrink-0",
+                            plan.highlighted ? "text-secondary" : "text-primary"
+                          )}
+                        />
+                        <p
+                          className={cn(
+                            "text-sm leading-6",
+                            plan.highlighted
+                              ? "text-background/75"
+                              : "text-muted-foreground"
+                          )}
+                        >
+                          {feature}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </section>
 

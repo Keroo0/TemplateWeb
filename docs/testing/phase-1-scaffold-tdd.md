@@ -10,7 +10,7 @@ Dokumen ini mencatat skenario TDD untuk fondasi Next.js Mauapalau. Test otomatis
 - Copy landing page memakai Bahasa Indonesia dan menyebut Mauapalau serta CTA pilih template.
 - TypeScript strict mode aktif dengan `noEmit` dan alias `@/*`.
 - Tailwind dan shadcn/ui siap dipakai lewat `tailwind.config.ts`, `components.json`, `globals.css`, dan `src/lib/utils.ts`.
-- Dependency utama tercatat di `package.json`: Framer Motion, lucide-react, react-hook-form, zod, Supabase SDK, Midtrans client, dan Resend.
+- Dependency utama tercatat di `package.json`: Framer Motion, lucide-react, react-hook-form, zod, Supabase SDK, dan Resend.
 - `.env.example` mendokumentasikan semua env penting tanpa secret asli.
 
 ## Worst-Case Scenarios
@@ -19,8 +19,8 @@ Dokumen ini mencatat skenario TDD untuk fondasi Next.js Mauapalau. Test otomatis
 - `tsconfig.json` longgar, tidak strict, atau alias import rusak.
 - shadcn/ui tidak bisa dipakai karena `components.json`, `cn` utility, atau CSS global hilang.
 - Framer Motion atau dependency runtime utama tidak tercatat di `package.json`.
-- `.env.example` kurang key penting untuk Supabase, Midtrans, Resend, admin email, atau app URL.
-- `.env.example` tanpa sengaja berisi token nyata seperti JWT Supabase atau Midtrans server key.
+- `.env.example` kurang key penting untuk Supabase, WhatsApp handoff, Resend, admin email, atau app URL.
+- `.env.example` tanpa sengaja berisi token nyata seperti JWT Supabase atau service role key.
 - Landing page masih placeholder bawaan scaffold atau tidak memakai Bahasa Indonesia.
 
 ## Verification Commands

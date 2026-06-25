@@ -7,7 +7,7 @@ Folder ini berisi paket SQL manual untuk database Mauapalau. Owner project menja
 - `categories` dan `templates`: katalog publik, hanya row aktif yang boleh dibaca `anon`/`authenticated`.
 - `orders`, `order_assets`, dan `order_status_log`: private. Customer dan admin mengakses lewat API route server-side.
 - Storage bucket `customer-uploads` dan `delivery-zips`: private. Upload/download dilakukan lewat server API memakai service role.
-- Jangan simpan service role key, Midtrans key, Resend key, atau secret lain di file SQL atau repo.
+- Jangan simpan service role key, Supabase access token, Resend key, atau secret lain di file SQL atau repo.
 
 ## Urutan Eksekusi
 

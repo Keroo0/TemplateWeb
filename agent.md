@@ -4,7 +4,7 @@ Panduan untuk Claude Code saat bekerja di repo ini.
 
 ## Tentang Proyek
 
-**Mauapalau** — platform jasa custom template web. Customer pilih template (undangan pernikahan, web permintaan maaf, web nembak, landing page, CRUD), isi form data, bayar via Midtrans, lalu admin (pemilik) kerjakan manual dan deliver hasilnya (link hosted atau zip download).
+**Mauapalau** — platform jasa custom template web. Customer pilih template (undangan pernikahan, web permintaan maaf, web nembak, landing page, CRUD), isi form data, konfirmasi pembayaran via WhatsApp, lalu admin (pemilik) kerjakan manual dan deliver hasilnya (link hosted atau zip download).
 
 **Target pasar**: Indonesia. Semua copy default Bahasa Indonesia.
 
@@ -15,7 +15,7 @@ Panduan untuk Claude Code saat bekerja di repo ini.
 - **21.dev** sebagai referensi dan sumber komponen UI React/Tailwind/shadcn-style
 - **Framer Motion** untuk animasi UI yang ringan dan conversion-friendly
 - **Supabase** (Postgres + Auth + Storage)
-- **Midtrans Snap** (payment gateway)
+- **WhatsApp handoff** untuk konfirmasi pembayaran manual
 - **Resend** (email)
 - **Vercel** (hosting)
 - Forms: **react-hook-form** + **zod**
@@ -28,7 +28,7 @@ src/
     (public)/           # Halaman publik (landing, katalog, order, cek-pesanan)
     u/[slug]/           # Renderer template hosted (undangan/maaf/nembak)
     admin/              # Dashboard admin (proteksi auth)
-    api/                # Route handlers (orders, payments, webhook)
+    api/                # Route handlers (orders dan endpoint server-side lain)
   components/
     ui/                 # shadcn primitives
     public/             # Komponen halaman publik
@@ -39,7 +39,7 @@ src/
     nembak/[nama]/
   lib/
     supabase/           # Client server & browser
-    midtrans.ts         # Snap token + webhook verifier
+    whatsapp.ts         # Helper nomor dan link WhatsApp
     email.ts            # Resend wrapper
     form-schema.ts      # form_schema (JSON) -> zod schema
     order-code.ts       # Generator order code
@@ -67,7 +67,7 @@ Skema utama:
 - Implementasi dianggap selesai hanya setelah test/verification yang sesuai dijalankan, misalnya `npm run lint`, `npm run typecheck`, `npm run build`, unit test, integration test, atau Playwright test sesuai risiko fitur.
 - Setelah fitur selesai dan verifikasi lewat, commit perubahan dengan pesan yang jelas lalu push ke GitHub remote `origin`, kecuali pemilik project meminta untuk tidak push.
 - Jika push gagal karena auth/network, laporkan jelas status commit lokal dan langkah yang perlu dilakukan.
-- Jangan commit secret, `.env`, service role key, Midtrans key, atau file lokal sensitif.
+- Jangan commit secret, `.env`, service role key, Supabase access token, atau file lokal sensitif.
 - Jika ada perubahan user yang tidak terkait, jangan revert. Commit hanya file yang relevan dengan fitur yang dikerjakan.
 
 ### Bahasa & Copy
@@ -81,11 +81,11 @@ Skema utama:
 - Animasi harus halus, cepat, dan membantu pemahaman. Hindari animasi berlebihan di flow pembayaran, form order, dan halaman admin yang butuh efisiensi.
 - Pastikan semua animasi punya state yang aman untuk mobile, tidak menyebabkan layout shift besar, dan tetap nyaman untuk user yang sensitif terhadap motion.
 
-### Payment & Webhook
-- **JANGAN** percaya status dari body webhook Midtrans. Selalu re-verify ke `/v2/{order_id}/status` Midtrans API.
-- Webhook harus **idempotent** — cek `orders.midtrans_transaction_status` sebelum update.
-- Verifikasi `signature_key` = SHA512(order_id + status_code + gross_amount + server_key).
-- Sandbox keys di local dev, production keys hanya di env Vercel.
+### Payment Manual & WhatsApp
+- Payment aktif diarahkan ke WhatsApp memakai `NEXT_PUBLIC_WHATSAPP_ORDER_NUMBER`.
+- Order baru tetap berstatus `pending_payment` sampai admin mengonfirmasi pembayaran secara manual.
+- Jangan menandai order `paid` dari input customer atau query string publik.
+- Link WhatsApp dibuat lewat `src/lib/whatsapp.ts` supaya format nomor dan pesan konsisten.
 
 ### Form Dinamis
 - `form_schema` di tabel `templates` adalah sumber kebenaran untuk field form order.
@@ -133,14 +133,14 @@ npx supabase gen types typescript --linked > src/lib/supabase/database.types.ts
 
 ## Yang HARUS Dihindari
 
-- Jangan mock Midtrans di test integrasi pembayaran — pakai sandbox Midtrans betulan.
-- Jangan simpan kartu/credential customer di DB. Midtrans yang handle.
+- Jangan membuat payment gateway baru tanpa keputusan produk eksplisit dari owner.
+- Jangan simpan kartu/credential pembayaran customer di DB.
 - Jangan expose `notes_internal` (catatan admin) ke endpoint publik.
 - Jangan hard-code template list — selalu dari DB + registry.
-- Jangan skip webhook verification untuk "kemudahan testing".
+- Jangan mengubah status pembayaran dari endpoint publik tanpa validasi admin.
 
 ## Referensi
 
 - Plan awal: `~/.claude/plans/saya-sedang-ada-plan-delegated-bentley.md`
-- Midtrans Snap docs: https://docs.midtrans.com/docs/snap-snap-integration-overview
+- WhatsApp click to chat: https://faq.whatsapp.com/5913398998672934
 - Supabase Next.js SSR: https://supabase.com/docs/guides/auth/server-side/nextjs

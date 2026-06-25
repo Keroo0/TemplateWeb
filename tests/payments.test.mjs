@@ -13,51 +13,48 @@ function exists(relativePath) {
   return existsSync(path.join(root, relativePath));
 }
 
-describe("Phase 7 Midtrans payment", () => {
-  it("centralizes Midtrans env, Snap creation, status fetch, and signature verification", () => {
-    const source = read("src/lib/midtrans.ts");
+describe("WhatsApp payment handoff", () => {
+  it("documents WhatsApp as the public payment handoff env", () => {
+    const env = read(".env.example");
 
-    assert.match(source, /MIDTRANS_SERVER_KEY/);
-    assert.match(source, /MIDTRANS_CLIENT_KEY/);
-    assert.match(source, /createSnapTransaction/);
-    assert.match(source, /getMidtransTransactionStatus/);
-    assert.match(source, /verifyMidtransSignature/);
-    assert.match(source, /sha512/);
-    assert.match(source, /order_id.*status_code.*gross_amount/s);
+    assert.match(env, /^NEXT_PUBLIC_WHATSAPP_ORDER_NUMBER=/m);
+    assert.doesNotMatch(env, /^MIDTRANS_SERVER_KEY=/m);
+    assert.doesNotMatch(env, /^MIDTRANS_CLIENT_KEY=/m);
   });
 
-  it("creates Snap tokens server-side from pending orders", () => {
-    assert.ok(exists("src/app/api/payments/snap/route.ts"));
-    const source = read("src/app/api/payments/snap/route.ts");
+  it("centralizes WhatsApp number normalization and URL generation", () => {
+    assert.ok(exists("src/lib/whatsapp.ts"));
+    const source = read("src/lib/whatsapp.ts");
 
-    assert.match(source, /POST/);
-    assert.match(source, /createSupabaseAdminClient/);
-    assert.match(source, /pending_payment/);
-    assert.match(source, /createSnapTransaction/);
-    assert.match(source, /midtrans_order_id/);
-    assert.doesNotMatch(source, /MIDTRANS_SERVER_KEY.*NextResponse/s);
+    assert.match(source, /NEXT_PUBLIC_WHATSAPP_ORDER_NUMBER/);
+    assert.match(source, /normalizeWhatsAppNumber/);
+    assert.match(source, /buildWhatsAppUrl/);
+    assert.match(source, /wa\.me/);
   });
 
-  it("handles webhook verification by re-checking Midtrans status before updating orders", () => {
-    assert.ok(exists("src/app/api/payments/webhook/route.ts"));
-    const source = read("src/app/api/payments/webhook/route.ts");
-
-    assert.match(source, /POST/);
-    assert.match(source, /verifyMidtransSignature/);
-    assert.match(source, /getMidtransTransactionStatus/);
-    assert.match(source, /midtrans_transaction_status/);
-    assert.match(source, /paid|expired|cancelled/);
-    assert.doesNotMatch(source, /status.*=.*body\.transaction_status/);
-  });
-
-  it("provides a payment page and links successful order creation to it", () => {
-    assert.ok(exists("src/app/(public)/payment/[orderCode]/page.tsx"));
-    const page = read("src/app/(public)/payment/[orderCode]/page.tsx");
+  it("links successful order creation to the payment handoff page", () => {
     const form = read("src/components/public/order-form.tsx");
 
-    assert.match(page, /orderCode/);
-    assert.match(page, /\/api\/payments\/snap/);
-    assert.match(page, /Bayar sekarang/);
     assert.match(form, /\/payment\/\$\{result\.order\?\.order_code\}/);
+    assert.match(form, /Lanjut via WhatsApp/);
+  });
+
+  it("provides a WhatsApp confirmation page without Snap checkout", () => {
+    assert.ok(exists("src/app/(public)/payment/[orderCode]/page.tsx"));
+    const page = read("src/app/(public)/payment/[orderCode]/page.tsx");
+    const panel = read("src/components/public/payment-panel.tsx");
+
+    assert.match(page, /WhatsApp/);
+    assert.match(panel, /buildWhatsAppUrl/);
+    assert.match(panel, /Konfirmasi via WhatsApp/);
+    assert.doesNotMatch(page, /api\/payments\/snap/);
+    assert.doesNotMatch(panel, /fetch\(/);
+  });
+
+  it("removes Midtrans routes and helper modules from the active app", () => {
+    assert.equal(exists("src/app/api/payments/snap/route.ts"), false);
+    assert.equal(exists("src/app/api/payments/webhook/route.ts"), false);
+    assert.equal(exists("src/lib/midtrans.ts"), false);
+    assert.equal(exists("src/lib/payments.ts"), false);
   });
 });

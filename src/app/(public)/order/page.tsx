@@ -50,8 +50,8 @@ export default async function OrderPage({ searchParams }: OrderPageProps) {
         <Badge variant="outline">{template.category.name}</Badge>
         <h1 className="mt-4 text-4xl font-semibold">Order {template.name}</h1>
         <p className="mt-3 max-w-2xl text-muted-foreground">
-          Isi data sesuai form_schema template. Setelah order dibuat, pembayaran
-          Midtrans akan disambungkan di Phase 7.
+          Isi data sesuai kebutuhan template. Setelah order dibuat, lu akan
+          diarahkan ke WhatsApp untuk konfirmasi pembayaran dan detail pengerjaan.
         </p>
 
         <Card className="mt-8">
